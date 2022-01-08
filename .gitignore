@@ -1,0 +1,19 @@
+.classpath
+.project
+.DS_Store
+.vscode/
+.log/
+.db/
+*.db
+.idea/
+.iml
+target/
+*.iml
+.settings
+
+# Compiled class file
+*.class
+*.cache
+
+# Log file
+*.log

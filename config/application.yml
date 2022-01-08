@@ -1,0 +1,9 @@
+server:
+  port: 8081
+  tomcat:
+    max-threads: 10
+    uri-encoding: UTF-8
+
+logging:
+  config: ./config/logback.xml
+  path: log/
