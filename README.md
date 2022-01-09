@@ -29,7 +29,7 @@ mvn clean install
 }
 ```
 
-## 1. Get widgets
+## 2. Get widgets
 
 ```js
 + GET /api/widgets
@@ -61,7 +61,7 @@ mvn clean install
 ]
 ```
 
-## 2. Create widget
+## 3. Create widget
 
 ```js
 + POST /api/widgets
@@ -92,7 +92,7 @@ mvn clean install
   "updatedAt": 1641641844904
 }
 ```
-## 3. Update widget
+## 4. Update widget
 
 ```js
 + PATCH /api/widgets/{widgetId}
@@ -123,7 +123,7 @@ mvn clean install
   "updatedAt": 1641641844904
 }
 ```
-## 3. Delete widget
+## 5. Delete widget
 
 ```js
 + DELETE /api/widgets/{widgetId}
