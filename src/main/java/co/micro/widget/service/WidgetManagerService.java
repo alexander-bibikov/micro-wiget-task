@@ -63,19 +63,19 @@ public class WidgetManagerService implements WidgetService {
     }
 
     @Override
-    public List<Widget> getWidgets(int limit) {
+    public List<Widget> getWidgets(int limit, Long maxCoordinateX, Long maxCoordinateY, Long width, Long height) {
         return widgetRepository.getWidgets()
             .stream()
             .limit(getLimit(limit))
-            .sorted(Comparator.comparingLong(Widget::getCoordinateZ))
-            .collect(Collectors.toUnmodifiableList());
-    }
-
-    @Override
-    public List<Widget> getWidgets(int limit, Long coordinateY, Long coordinateX, Long width, Long height) {
-        return widgetRepository.getWidgets()
-            .stream()
-            .limit(getLimit(limit))
+            //TODO: This is a draft filtering
+            .filter(wg -> Objects.nonNull(maxCoordinateY) ? wg.getCoordinateY() >= 0 && wg.getCoordinateY() <= maxCoordinateY : true)
+            .filter(wg -> Objects.nonNull(maxCoordinateX) ? wg.getCoordinateX() >= 0 && wg.getCoordinateX() <= maxCoordinateX : true)
+            .filter(wg -> Objects.nonNull(width) ? wg.getWidth() == width : true)
+            .filter(wg -> Objects.nonNull(height) ? wg.getHeight() == height : true)
+            .filter(wg -> Objects.nonNull(maxCoordinateY) && Objects.nonNull(height) ?
+                wg.getCoordinateY() + Double.valueOf(wg.getHeight()) / 2 <= maxCoordinateY : true)
+            .filter(wg -> Objects.nonNull(maxCoordinateX) && Objects.nonNull(width) ?
+                wg.getCoordinateX() + Double.valueOf(wg.getWidth()) / 2 <= maxCoordinateX : true)
             .sorted(Comparator.comparingLong(Widget::getCoordinateZ))
             .collect(Collectors.toUnmodifiableList());
     }

@@ -1,9 +1,7 @@
 package co.micro.widget;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import co.micro.widget.entity.CreateWidget;
 import co.micro.widget.entity.UpdateWidget;
@@ -21,7 +19,6 @@ import static co.micro.widget.helpers.WidgetHelper.checkWidget;
 import static co.micro.widget.helpers.WidgetHelper.getCreateRequest;
 import static co.micro.widget.helpers.WidgetHelper.getUpdateRequest;
 import static co.micro.widget.helpers.WidgetHelper.getWidget;
-import static co.micro.widget.helpers.WidgetHelper.toDouble;
 import static co.micro.widget.helpers.WidgetHelper.toLong;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -320,34 +317,35 @@ public class WidgetManagerServiceTest {
     }
 
     @Test
-    public void filtering() {
-        Long maxY = 150L;
-        Long maxX = 100L;
-        Long width = 100L;
-        Long height = 100L;
+    public void searchWidgets() {
+        long maxCoordinateX = 100L;
+        long maxCoordinateY = 150L;
+        long width = 100L;
+        long height = 100L;
 
         List<CreateWidget> requests = List.of(
             getCreateRequest("Widget_1", 50, 50, 1, 100, 100, UUID.randomUUID()),
-            getCreateRequest("Widget_2", 50, 100, 2, 100, 100, UUID.randomUUID()),
+            getCreateRequest("Widget_2", 50, 150, 2, 100, 100, UUID.randomUUID()),
             getCreateRequest("Widget_3", 100, 100, 3, 100, 100, UUID.randomUUID()),
-            getCreateRequest("Widget_4", 50, 150, 4, 100, 100, UUID.randomUUID()),
+            getCreateRequest("Widget_4", 50, 100, 4, 100, 100, UUID.randomUUID()),
             getCreateRequest("Widget_5", 100, 150, 5, 100, 100, UUID.randomUUID()),
             getCreateRequest("Widget_6", 150, 150, 6, 100, 100, UUID.randomUUID())
         );
 
         createWidgets(requests);
 
-        List<Widget> actualWidgets = getWidgets()
-            .stream()
-            .filter(wg -> Objects.nonNull(maxY) ? wg.getCoordinateY() >= 0 && wg.getCoordinateY() <= maxY : true)
-            .filter(wg -> Objects.nonNull(maxX) ? wg.getCoordinateX() >= 0 && wg.getCoordinateX() <= maxX : true)
-            .filter(wg -> Objects.nonNull(width) ? wg.getWidth() == width : true)
-            .filter(wg -> Objects.nonNull(height) ? wg.getHeight() == height : true)
-            .filter(wg -> Objects.nonNull(maxY) && Objects.nonNull(height) ? wg.getCoordinateY() + toDouble(wg.getHeight()) / 2 <= maxY : true)
-            .filter(wg -> Objects.nonNull(maxX) && Objects.nonNull(width) ? wg.getCoordinateX() + toDouble(wg.getWidth()) / 2 <= maxX : true)
-            .collect(Collectors.toList());
+        List<Widget> actualWidgets = getWidgets(maxCoordinateX, maxCoordinateY, width, height);
 
         assertFalse(actualWidgets.isEmpty());
+        assertEquals(actualWidgets.size(), 2);
+        checkWidget(
+            actualWidgets.get(0),
+            getWidget("Widget_1", 50, 50, 1, 100, 100)
+        );
+        checkWidget(
+            actualWidgets.get(1),
+            getWidget("Widget_4", 50, 100, 4, 100, 100)
+        );
     }
 
     private Widget createWidget(CreateWidget widget) {
@@ -362,12 +360,22 @@ public class WidgetManagerServiceTest {
         widgetManager.deleteWidget(widgetId);
     }
 
-    private void createWidgets(List<CreateWidget> requests) {
-        requests.forEach(request -> createWidget(request));
+    private List<Widget> getWidgets() {
+        return widgetManager.getWidgets(
+            WidgetManagerService.ROW_LIMIT_DEFAULT, null, null, null, null);
     }
 
-    private List<Widget> getWidgets() {
-        return widgetManager.getWidgets(WidgetManagerService.ROW_LIMIT_DEFAULT);
+    private List<Widget> getWidgets(long maxCoordinateX, long maxCoordinateY, long width, long height) {
+        return widgetManager.getWidgets(
+            WidgetManagerService.ROW_LIMIT_DEFAULT,
+            toLong(maxCoordinateX),
+            toLong(maxCoordinateY),
+            toLong(width),
+            toLong(height));
+    }
+
+    private void createWidgets(List<CreateWidget> requests) {
+        requests.forEach(request -> createWidget(request));
     }
 
     private static UpdateWidget setCoordinateZ(long z) {

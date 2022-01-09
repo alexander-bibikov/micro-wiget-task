@@ -72,8 +72,4 @@ public class WidgetHelper {
     public static Long toLong(long v) {
         return Long.valueOf(v);
     }
-
-    public static Double toDouble(long v) {
-        return Double.valueOf(v);
-    }
 }

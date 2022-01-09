@@ -1,5 +1,6 @@
 package co.micro.widget;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -8,7 +9,6 @@ import co.micro.widget.entity.UpdateWidget;
 import co.micro.widget.entity.Widget;
 import co.micro.widget.helpers.WidgetHelper;
 import co.micro.widget.service.WidgetManagerService;
-import co.micro.widget.service.WidgetService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
@@ -46,9 +46,6 @@ public class WidgetManagerServiceIT {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
-    private WidgetService widgetManager;
-
     @Test
     public void createWidget() throws Exception {
         CreateWidget request = getCreateRequest("Widget_1", 9, 8, 1, 10, 20);
@@ -83,7 +80,7 @@ public class WidgetManagerServiceIT {
     @Test
     public void deleteWidget() throws Exception {
         createWidget(getCreateRequest("Widget_1", 9, 8, 1, 10, 20));
-        UUID widgetId = getWidgets().get(0).getWidgetId();
+        UUID widgetId = this.getWidgets().get(0).getWidgetId();
 
         deleteWidget(widgetId);
         List<Widget> actualWidgets = getWidgets();
@@ -100,6 +97,29 @@ public class WidgetManagerServiceIT {
         Widget actualWidget = objectMapper.readValue(json, Widget.class);
 
         checkWidget(actualWidget, WidgetHelper.getWidget("Widget_1", 9, 8, 1, 10, 20));
+    }
+
+    @Test
+    public void getWidgetsWithRowLimit() throws Exception {
+        createWidget(getCreateRequest("Widget_1", 50, 50, 1, 100, 100, UUID.randomUUID()));
+        createWidget(getCreateRequest("Widget_2", 50, 150, 2, 100, 100, UUID.randomUUID()));
+        createWidget(getCreateRequest("Widget_3", 100, 100, 3, 100, 100, UUID.randomUUID()));
+        createWidget(getCreateRequest("Widget_4", 50, 100, 4, 100, 100, UUID.randomUUID()));
+        createWidget(getCreateRequest("Widget_5", 100, 150, 5, 100, 100, UUID.randomUUID()));
+
+        String json = getWidgets(2).getResponse().getContentAsString();
+        List<Widget> actualWidgets = Arrays.asList(objectMapper.readValue(json, Widget[].class));
+
+        assertFalse(actualWidgets.isEmpty());
+        assertEquals(actualWidgets.size(), 2);
+        checkWidget(
+            actualWidgets.get(0),
+            WidgetHelper.getWidget("Widget_1", 50, 50, 1, 100, 100)
+        );
+        checkWidget(
+            actualWidgets.get(1),
+            WidgetHelper.getWidget("Widget_2", 50, 150, 2, 100, 100)
+        );
     }
 
     private MvcResult createWidget(CreateWidget request) throws Exception {
@@ -134,12 +154,21 @@ public class WidgetManagerServiceIT {
             .andReturn();
     }
 
-    private String objToJsonString(Object data) throws JsonProcessingException {
-        return objectMapper.writeValueAsString(data);
+    private List<Widget> getWidgets() throws Exception {
+        String json = getWidgets(WidgetManagerService.ROW_LIMIT_DEFAULT).getResponse().getContentAsString();
+        return Arrays.asList(objectMapper.readValue(json, Widget[].class));
     }
 
-    private List<Widget> getWidgets() {
-        return widgetManager.getWidgets(WidgetManagerService.ROW_LIMIT_DEFAULT);
+    private MvcResult getWidgets(int limit) throws Exception {
+        return mockMvc.perform(MockMvcRequestBuilders
+                .get(URL)
+                .param("limit", String.valueOf(limit)))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    private String objToJsonString(Object data) throws JsonProcessingException {
+        return objectMapper.writeValueAsString(data);
     }
 
     private static String getUrlWithId(UUID widgetId) {

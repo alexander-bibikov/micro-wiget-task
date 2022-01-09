@@ -18,8 +18,6 @@ public interface WidgetService {
 
     Widget getWidget(UUID widgetId);
 
-    List<Widget> getWidgets(int limit);
-
     List<Widget> getWidgets(
         int limit,
         Long maxCoordinateX,

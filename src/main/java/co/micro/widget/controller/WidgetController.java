@@ -54,17 +54,8 @@ public class WidgetController {
         return response(widgetManager.getWidget(widgetId), HttpStatus.OK);
     }
 
-//    @RequestMapping(method = RequestMethod.GET, produces = CONTENT_TYPE)
-//    public ResponseEntity<List<Widget>> getWidgets(@RequestParam(required = false) String limit) {
-//        return response(
-//            widgetManager.getWidgets(Optional.ofNullable(limit)
-//                .map(Integer::valueOf)
-//                .orElse(0)),
-//            HttpStatus.OK);
-//    }
-
     @RequestMapping(method = RequestMethod.GET, produces = CONTENT_TYPE)
-    public ResponseEntity<List<Widget>> getFilteredWidgets(
+    public ResponseEntity<List<Widget>> getWidgets(
         @RequestParam(required = false) String limit,
         @RequestParam(required = false) String maxCoordinateX,
         @RequestParam(required = false) String maxCoordinateY,
