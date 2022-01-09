@@ -1,5 +1,15 @@
 # Micro Widget Task
 
+# Start service
+```
+mvn spring-boot:run
+```
+
+# Run tests
+```
+mvn clean install
+```
+
 ## 1. Get widget
 
 ```js
