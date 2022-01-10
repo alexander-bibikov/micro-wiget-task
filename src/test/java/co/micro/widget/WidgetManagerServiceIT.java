@@ -55,10 +55,7 @@ public class WidgetManagerServiceIT {
 
         assertFalse(actualWidgets.isEmpty());
         assertEquals(actualWidgets.size(), 1);
-        checkWidget(
-            actualWidgets.get(0),
-            WidgetHelper.getWidget("Widget_1", 9, 8, 1, 10, 20)
-        );
+        checkWidget(actualWidgets.get(0), WidgetHelper.getWidget("Widget_1", 9, 8, 1, 10, 20));
     }
 
     @Test
@@ -71,10 +68,7 @@ public class WidgetManagerServiceIT {
 
         assertFalse(actualWidgets.isEmpty());
         assertEquals(actualWidgets.size(), 1);
-        checkWidget(
-            actualWidgets.get(0),
-            WidgetHelper.getWidget("Widget_2", 10, 4, 2, 20, 30)
-        );
+        checkWidget(actualWidgets.get(0), WidgetHelper.getWidget("Widget_2", 10, 4, 2, 20, 30));
     }
 
     @Test

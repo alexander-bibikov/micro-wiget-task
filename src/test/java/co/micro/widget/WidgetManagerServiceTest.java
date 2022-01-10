@@ -62,18 +62,9 @@ public class WidgetManagerServiceTest {
         createWidget(request);
 
         List<Widget> actualWidgets = getWidgets();
-        Widget actualWidget = Widget.builder()
-            .widgetId(request.getWidgetId())
-            .widgetName(request.getWidgetName())
-            .coordinateX(request.getCoordinateX())
-            .coordinateY(request.getCoordinateY())
-            .coordinateZ(toLong(0))
-            .height(request.getHeight())
-            .width(request.getWidth())
-            .build();
 
         assertFalse(actualWidgets.isEmpty());
-        checkWidget(actualWidgets.get(0), actualWidget);
+        checkWidget(actualWidgets.get(0), getWidget("Widget_1", 9, 8, 0, 10, 20));
     }
 
     @Test
