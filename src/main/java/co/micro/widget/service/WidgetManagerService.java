@@ -171,7 +171,7 @@ public class WidgetManagerService implements WidgetService {
     }
 
     private static UpdateWidget applyChanges(UpdateWidget request, Widget widget) {
-        UpdateWidget rr = UpdateWidget.builder()
+        return UpdateWidget.builder()
             .widgetId(widget.getWidgetId())
             .widgetName(applyFirstNonNullable(request.getWidgetName(), widget.getWidgetName()))
             .coordinateX(applyFirstNonNullable(request.getCoordinateX(), widget.getCoordinateX()))
@@ -181,19 +181,6 @@ public class WidgetManagerService implements WidgetService {
             .height(applyFirstNonNullable(request.getHeight(), widget.getHeight()))
             .updatedAt(ZonedDateTime.now().toInstant().toEpochMilli())
             .build();
-
-        return rr;
-
-//        return UpdateWidget.builder()
-//            .widgetId(widget.getWidgetId())
-//            .widgetName(applyFirstNonNullable(request.getWidgetName(), widget.getWidgetName()))
-//            .coordinateX(applyFirstNonNullable(request.getCoordinateX(), widget.getCoordinateX()))
-//            .coordinateY(applyFirstNonNullable(request.getCoordinateY(), widget.getCoordinateY()))
-//            .coordinateZ(applyFirstNonNullable(request.getCoordinateZ(), widget.getCoordinateZ()))
-//            .width(applyFirstNonNullable(request.getWidth(), widget.getWidth()))
-//            .height(applyFirstNonNullable(request.getHeight(), widget.getHeight()))
-//            .updatedAt(ZonedDateTime.now().toInstant().toEpochMilli())
-//            .build();
     }
 
     private static <V> V applyFirstNonNullable(V v1, V v2) {
