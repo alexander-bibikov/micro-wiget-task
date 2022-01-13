@@ -2,7 +2,6 @@ package co.micro.widget.repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -22,7 +21,7 @@ import org.springframework.stereotype.Repository;
 
 
 @Repository
-public class WidgetManagerRepository implements WidgetRepository {
+public class WidgetH2ManagerRepository implements WidgetRepository {
 
     @Autowired
     public JdbcTemplate jdbcTemplate;
@@ -30,10 +29,8 @@ public class WidgetManagerRepository implements WidgetRepository {
     @Override
     public Widget createWidget(CreateWidget request) {
         jdbcTemplate.update(
-            "INSERT INTO widgets (widget_id, widget_name, coordinate_x, coordinate_y, coordinate_z, width, height, updated_at, created_at)" +
-            "VALUES(?, ?, ?, ?, ?, ?, ?,\n" +
-            "extract(EPOCH FROM now()) * 1000,\n" +
-            "extract(EPOCH FROM now()) * 1000)",
+            "INSERT INTO widgets (widget_id, widget_name, coordinate_x, coordinate_y, coordinate_z, width, height, updated_at, created_at)\n" +
+            "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
             new Object[]{
                 request.getWidgetId(),
                 request.getWidgetName(),
@@ -41,7 +38,9 @@ public class WidgetManagerRepository implements WidgetRepository {
                 request.getCoordinateY(),
                 request.getCoordinateZ(),
                 request.getWidth(),
-                request.getHeight()
+                request.getHeight(),
+                request.getUpdatedAt(),
+                request.getCreatedAt()
             }
         );
 
@@ -71,9 +70,22 @@ public class WidgetManagerRepository implements WidgetRepository {
     public Optional<Widget> getWidget(UUID widgetId) {
         try {
             return Optional.of(jdbcTemplate.queryForObject(
-                "SELECT widget_id, widget_name, coordinate_x, coordinate_y, coordinate_z, width, height, updated_at, created_at FROM widgets WHERE widget_id = ?",
+                "SELECT widget_id, widget_name, coordinate_x, coordinate_y, coordinate_z, width, height, updated_at, created_at FROM widgets\n" +
+                "WHERE widget_id = ?",
                 new WidgetMapper(),
                 widgetId));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<Widget> getWidgetMaxByCoordinateZ() {
+        try {
+            return Optional.of(jdbcTemplate.queryForObject(
+                "SELECT widget_id, widget_name, coordinate_x, coordinate_y, coordinate_z, width, height, updated_at, created_at FROM widgets\n" +
+                "WHERE coordinate_z = (SELECT MAX(coordinate_z) FROM widgets)",
+                new WidgetMapper()));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
@@ -84,6 +96,20 @@ public class WidgetManagerRepository implements WidgetRepository {
         return jdbcTemplate.query(
             "SELECT widget_id, widget_name, coordinate_x, coordinate_y, coordinate_z, width, height, updated_at, created_at FROM widgets",
             new WidgetMapper());
+    }
+
+    @Override
+    public List<Widget> getWidgets(Long startFromZ) {
+        return jdbcTemplate.query(
+            "WITH wg AS (\n" +
+            "    SELECT *\n" +
+            "    FROM widgets\n" +
+            "    ORDER BY coordinate_z\n" +
+            ")\n" +
+            "SELECT * FROM wg\n" +
+            "WHERE wg.coordinate_z >= ?",
+            new WidgetMapper(),
+            startFromZ);
     }
 
     private static Pair<String, List<Object>> prepareUpdate(UpdateWidget widget) {
@@ -116,7 +142,7 @@ public class WidgetManagerRepository implements WidgetRepository {
         }
 
         set.append("updated_at = ?,\n");
-        params.add(ZonedDateTime.now().toInstant().toEpochMilli());
+        params.add(widget.getUpdatedAt());
 
         params.add(widget.getWidgetId());
 

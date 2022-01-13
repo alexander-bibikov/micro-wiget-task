@@ -26,6 +26,8 @@ public class UpdateWidget {
 
     private Long coordinateZ;
 
+    private Long updatedAt;
+
     @Positive
     private Long width;
 

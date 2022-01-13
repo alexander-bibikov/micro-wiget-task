@@ -29,6 +29,10 @@ public class CreateWidget {
 
     private Long coordinateZ;
 
+    private Long createdAt;
+
+    private Long updatedAt;
+
     @NotNull
     @Positive
     private Long width;
