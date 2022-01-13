@@ -80,8 +80,7 @@ public class WidgetManagerService implements WidgetService {
         }
     }
 
-    @Override
-    public List<Widget> getWidgets(int limit, Long maxCoordinateX, Long maxCoordinateY, Long width, Long height) {
+    public List<Widget> getWidgets(int page, int limit, Long maxCoordinateX, Long maxCoordinateY, Long width, Long height) {
         lock.readLock().lock();
         try {
             return widgetRepository.getWidgets().stream()
@@ -95,6 +94,7 @@ public class WidgetManagerService implements WidgetService {
                 .filter(wg -> Objects.nonNull(maxCoordinateX) && Objects.nonNull(width) ?
                     wg.getCoordinateX() + Double.valueOf(wg.getWidth()) / 2 <= maxCoordinateX : true)
                 .sorted(Comparator.comparingLong(Widget::getCoordinateZ))
+                .skip((page - 1) * getLimit(limit))
                 .limit(getLimit(limit))
                 .collect(Collectors.toUnmodifiableList());
         } finally {

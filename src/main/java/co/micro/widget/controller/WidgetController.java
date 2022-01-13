@@ -56,6 +56,7 @@ public class WidgetController {
 
     @RequestMapping(method = RequestMethod.GET, produces = CONTENT_TYPE)
     public ResponseEntity<List<Widget>> getWidgets(
+        @RequestParam(required = false) String page,
         @RequestParam(required = false) String limit,
         @RequestParam(required = false) String maxCoordinateX,
         @RequestParam(required = false) String maxCoordinateY,
@@ -63,6 +64,10 @@ public class WidgetController {
         @RequestParam(required = false) String height) {
 
         return response(widgetManager.getWidgets(
+            Optional.ofNullable(page)
+                .map(Integer::valueOf)
+                .map(v -> Objects.equals(v, 0) ? 1 : v)
+                .orElse(1),
             Optional.ofNullable(limit).map(Integer::valueOf).orElse(0),
             getWhenDefined(maxCoordinateX),
             getWhenDefined(maxCoordinateY),

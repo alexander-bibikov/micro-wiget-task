@@ -30,6 +30,7 @@ import static org.junit.Assert.assertTrue;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class WidgetManagerServiceTest {
 
+    private static final int PAGE = 1;
     private static final UUID WIDGET_ID = UUID.randomUUID();
 
     @Autowired
@@ -353,11 +354,12 @@ public class WidgetManagerServiceTest {
 
     private List<Widget> getWidgets() {
         return widgetManager.getWidgets(
-            WidgetManagerService.ROW_LIMIT_DEFAULT, null, null, null, null);
+            PAGE, WidgetManagerService.ROW_LIMIT_DEFAULT, null, null, null, null);
     }
 
     private List<Widget> getWidgets(long maxCoordinateX, long maxCoordinateY, long width, long height) {
         return widgetManager.getWidgets(
+            PAGE,
             WidgetManagerService.ROW_LIMIT_DEFAULT,
             toLong(maxCoordinateX),
             toLong(maxCoordinateY),
