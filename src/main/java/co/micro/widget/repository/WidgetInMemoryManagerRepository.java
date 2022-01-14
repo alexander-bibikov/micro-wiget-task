@@ -42,7 +42,9 @@ public class WidgetInMemoryManagerRepository implements WidgetRepository {
     public Optional<Widget> getWidget(UUID widgetId) {
         Widget wg = widgets.get(widgetId);
 
-        return Objects.nonNull(wg) ? Optional.of(wg) : Optional.empty();
+        return Objects.nonNull(wg) ?
+            Optional.of(wg) :
+            Optional.empty();
     }
 
     @Override
@@ -60,6 +62,7 @@ public class WidgetInMemoryManagerRepository implements WidgetRepository {
 
     private Widget put(Widget widget) {
         widgets.put(widget.getWidgetId(), widget);
+
         return widgets.get(widget.getWidgetId());
     }
 

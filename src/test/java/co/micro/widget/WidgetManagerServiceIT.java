@@ -101,8 +101,7 @@ public class WidgetManagerServiceIT {
         createWidget(getCreateRequest("Widget_4", 50, 100, 4, 100, 100, UUID.randomUUID()));
         createWidget(getCreateRequest("Widget_5", 100, 150, 5, 100, 100, UUID.randomUUID()));
 
-        String json = getWidgets(2).getResponse().getContentAsString();
-        List<Widget> actualWidgets = Arrays.asList(objectMapper.readValue(json, Widget[].class));
+        List<Widget> actualWidgets = getWidgets(2);
 
         assertFalse(actualWidgets.isEmpty());
         assertEquals(actualWidgets.size(), 2);
@@ -113,6 +112,62 @@ public class WidgetManagerServiceIT {
         checkWidget(
             actualWidgets.get(1),
             WidgetHelper.getWidget("Widget_2", 50, 150, 2, 100, 100)
+        );
+    }
+
+    @Test
+    public void getWidgetsWithPagination() throws Exception {
+        createWidget(getCreateRequest("Widget_1", 50, 50, 1, 100, 100, UUID.randomUUID()));
+        createWidget(getCreateRequest("Widget_2", 50, 150, 2, 100, 100, UUID.randomUUID()));
+        createWidget(getCreateRequest("Widget_3", 100, 100, 3, 100, 100, UUID.randomUUID()));
+        createWidget(getCreateRequest("Widget_4", 50, 100, 4, 100, 100, UUID.randomUUID()));
+        createWidget(getCreateRequest("Widget_5", 100, 150, 5, 100, 100, UUID.randomUUID()));
+
+        List<Widget> actualWidgets = getWidgets(1, WidgetManagerService.ROW_LIMIT_DEFAULT);
+
+        assertFalse(actualWidgets.isEmpty());
+        assertEquals(actualWidgets.size(), 5);
+    }
+
+    @Test
+    public void getWidgetsWithLimitAndPagination() throws Exception {
+        createWidget(getCreateRequest("Widget_1", 50, 50, 1, 100, 100, UUID.randomUUID()));
+        createWidget(getCreateRequest("Widget_2", 50, 150, 2, 100, 100, UUID.randomUUID()));
+        createWidget(getCreateRequest("Widget_3", 100, 100, 3, 100, 100, UUID.randomUUID()));
+        createWidget(getCreateRequest("Widget_4", 50, 100, 4, 100, 100, UUID.randomUUID()));
+        createWidget(getCreateRequest("Widget_5", 100, 150, 5, 100, 100, UUID.randomUUID()));
+
+        List<Widget> actualWidgetsPage1 = getWidgets(1, 2);
+        List<Widget> actualWidgetsPage2 = getWidgets(2, 2);
+        List<Widget> actualWidgetsPage3 = getWidgets(3, 2);
+
+        assertFalse(actualWidgetsPage1.isEmpty());
+        assertEquals(actualWidgetsPage1.size(), 2);
+        checkWidget(
+            actualWidgetsPage1.get(0),
+            WidgetHelper.getWidget("Widget_1", 50, 50, 1, 100, 100)
+        );
+        checkWidget(
+            actualWidgetsPage1.get(1),
+            WidgetHelper.getWidget("Widget_2", 50, 150, 2, 100, 100)
+        );
+
+        assertFalse(actualWidgetsPage2.isEmpty());
+        assertEquals(actualWidgetsPage2.size(), 2);
+        checkWidget(
+            actualWidgetsPage2.get(0),
+            WidgetHelper.getWidget("Widget_3", 100, 100, 3, 100, 100)
+        );
+        checkWidget(
+            actualWidgetsPage2.get(1),
+            WidgetHelper.getWidget("Widget_4", 50, 100, 4, 100, 100)
+        );
+
+        assertFalse(actualWidgetsPage3.isEmpty());
+        assertEquals(actualWidgetsPage3.size(), 1);
+        checkWidget(
+            actualWidgetsPage3.get(0),
+            WidgetHelper.getWidget("Widget_5", 100, 150, 5, 100, 100)
         );
     }
 
@@ -149,16 +204,32 @@ public class WidgetManagerServiceIT {
     }
 
     private List<Widget> getWidgets() throws Exception {
-        String json = getWidgets(WidgetManagerService.ROW_LIMIT_DEFAULT).getResponse().getContentAsString();
-        return Arrays.asList(objectMapper.readValue(json, Widget[].class));
+        return getWidgets(WidgetManagerService.ROW_LIMIT_DEFAULT);
     }
 
-    private MvcResult getWidgets(int limit) throws Exception {
-        return mockMvc.perform(MockMvcRequestBuilders
+    private List<Widget> getWidgets(int limit) throws Exception {
+        String json = mockMvc.perform(MockMvcRequestBuilders
                 .get(URL)
                 .param("limit", String.valueOf(limit)))
             .andExpect(status().isOk())
-            .andReturn();
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+        return Arrays.asList(objectMapper.readValue(json, Widget[].class));
+    }
+
+    private List<Widget> getWidgets(int page, int limit) throws Exception {
+        String json = mockMvc.perform(MockMvcRequestBuilders
+                .get(URL)
+                .param("page", String.valueOf(page))
+                .param("limit", String.valueOf(limit)))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+        return Arrays.asList(objectMapper.readValue(json, Widget[].class));
     }
 
     private String objToJsonString(Object data) throws JsonProcessingException {
